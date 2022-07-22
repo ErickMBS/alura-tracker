@@ -10,14 +10,21 @@
           id="nomeDoProjeto"
         />
       </div>
-      <div class="field"><button class="button" type="submit">Salvar</button></div>
+      <div class="field">
+        <button class="button" type="submit">Salvar</button>
+      </div>
     </form>
   </section>
 </template>
 
 <script lang="ts">
+import { TipoNotificacao } from "@/interfaces/INotificacao";
+import { notificacaoMixin } from "@/mixins/notificar";
 import { useStore } from "@/store";
-import { ADICIONA_PROJETO, ALTERA_PROJETO } from "@/store/tipo-mutacoes";
+import {
+  ADICIONA_PROJETO,
+  ALTERA_PROJETO,
+} from "@/store/tipo-mutacoes";
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -27,36 +34,46 @@ export default defineComponent({
       type: String,
     },
   },
-  mounted () {
-    if(this.id) {
-      const projeto = this.store.state.projetos.find(proj => proj.id == this.id)
-      this.nomeDoProjeto = projeto?.nome || ''
+  mixins: [
+    notificacaoMixin
+  ],
+  mounted() {
+    if (this.id) {
+      const projeto = this.store.state.projetos.find(
+        (proj) => proj.id == this.id
+      );
+      this.nomeDoProjeto = projeto?.nome || "";
     }
   },
-  data () {
+  data() {
     return {
-      nomeDoProjeto: ''
+      nomeDoProjeto: "",
     };
-  }, 
+  },
   methods: {
-    salvar () {
+    salvar() {
       if (this.id) {
         this.store.commit(ALTERA_PROJETO, {
           id: this.id,
-          nome: this.nomeDoProjeto
-        })
+          nome: this.nomeDoProjeto,
+        });
       } else {
         this.store.commit(ADICIONA_PROJETO, this.nomeDoProjeto);
-      }      
-      this.nomeDoProjeto = '';
-      this.$router.push('/projetos')
-    }
+      }
+      this.nomeDoProjeto = "";
+      this.notificar(
+        TipoNotificacao.SUCESSO,
+        "Projeto cadastrado",
+        "Seu projeto foi cadastrado e já pode ser usado."
+      );
+      this.$router.push("/projetos");
+    },
   },
-  setup () {
+  setup() {
     const store = useStore();
     return {
-      store
-    }
-  }
+      store,
+    };
+  },
 });
 </script>
