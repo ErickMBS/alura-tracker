@@ -1,4 +1,4 @@
-<template>
+<template> 
   <header>
     <h1>
       <img src="../assets/logo.png" alt="">
