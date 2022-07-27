@@ -3,12 +3,7 @@
     <form @submit.prevent="salvar">
       <div class="field">
         <label for="nomeDoProjeto" class="label"> Nome do Projeto</label>
-        <input
-          type="text"
-          class="input"
-          v-model="nomeDoProjeto"
-          id="nomeDoProjeto"
-        />
+        <input type="text" class="input" v-model="nomeDoProjeto" id="nomeDoProjeto" />
       </div>
       <div class="field">
         <button class="button" type="submit">Salvar</button>
@@ -33,9 +28,7 @@ export default defineComponent({
   },
   mounted() {
     if (this.id) {
-      const projeto = this.store.state.projetos.find(
-        (proj) => proj.id == this.id
-      );
+      const projeto = this.store.state.projeto.projetos.find((proj) => proj.id == this.id);
       this.nomeDoProjeto = projeto?.nome || "";
     }
   },
