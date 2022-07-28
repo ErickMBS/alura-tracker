@@ -1,51 +1,59 @@
 <template>
   <Formulario @aoSalvarTarefa="salvarTarefa" />
   <div class="lista">
+    <Box v-if="listaEstaVazia"> Você não está muito produtivo hoje :( </Box>
+
+    <div class="field">
+      <p class="control has-icons-left has-icons-right">
+        <input
+          class="input"
+          type="text"
+          placeholder="Filtrar tarefas"
+          v-model="filtro"
+        />
+        <span class="icon is-small is-left">
+          <i class="fas fa-search"></i>
+        </span>
+      </p>
+    </div>
+
     <Tarefa
       v-for="(tarefa, index) in tarefas"
       :key="index"
       :tarefa="tarefa"
       @aoTarefaClicada="selecionarTarefa"
     />
-    <Box v-if="listaEstaVazia"> Você não está muito produtivo hoje :( </Box>
 
-    <div
-      class="modal"
-      :class="{ 'is-active': tarefaSelecionada.id }"
-      :v-if="tarefaSelecionada.id != 0"
-    >
-      <div class="modal-background"></div>
-      <div class="modal-card">
-        <header class="modal-card-head">
-          <p class="modal-card-title">Editar Tarefa</p>
-          <button
-            @click="fecharModal"
-            class="delete"
-            aria-label="close"
-          ></button>
-        </header>
-        <section class="modal-card-body">
-          <div class="field">
-            <label for="descricaoDaTarefa" class="label"> Descrição</label>
-            <input
-              type="text"
-              class="input"
-              v-model="tarefaSelecionada.descricao"
-              id="nomeDaTarefa"
-            />
-          </div>
-        </section>
-        <footer class="modal-card-foot">
-          <button @click="alterarTarefa" class="button is-success">Salvar alterações</button>
-          <button @click="fecharModal" class="button">Cancelar</button>
-        </footer>
-      </div>
-    </div>
+    <Modal :mostrar="tarefaSelecionada.id != 0">
+      <template v-slot:cabecalho>
+        <p class="modal-card-title">Editar Tarefa</p>
+        <button @click="fecharModal" class="delete" aria-label="close"></button>
+      </template>
+
+      <template v-slot:corpo>
+        <div class="field">
+          <label for="descricaoDaTarefa" class="label"> Descrição</label>
+          <input
+            type="text"
+            class="input"
+            v-model="tarefaSelecionada.descricao"
+            id="nomeDaTarefa"
+          />
+        </div>
+      </template>
+
+      <template v-slot:rodape>
+        <button @click="alterarTarefa" class="button is-success">
+          Salvar alterações
+        </button>
+        <button @click="fecharModal" class="button">Cancelar</button>
+      </template>
+    </Modal>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from "vue";
+import { computed, defineComponent, ref, watchEffect } from "vue";
 import Formulario from "@/components/Formulario.vue";
 import Tarefa from "@/components/Tarefa.vue";
 import Box from "@/components/Box.vue";
@@ -57,6 +65,7 @@ import {
   OBTER_TAREFAS,
 } from "@/store/tipo-acoes";
 import ITarefa from "@/interfaces/ITarefa";
+import Modal from "@/components/Modal.vue";
 
 export default defineComponent({
   name: "App",
@@ -64,10 +73,11 @@ export default defineComponent({
     Formulario,
     Tarefa,
     Box,
-  },
+    Modal
+},
   data() {
     return {
-      tarefaSelecionada: {} as ITarefa,
+      tarefaSelecionada: {id: 0} as ITarefa,
     };
   },
   computed: {
@@ -83,20 +93,29 @@ export default defineComponent({
       this.tarefaSelecionada = tarefa;
     },
     fecharModal() {
-      this.tarefaSelecionada = {} as ITarefa;
+      this.tarefaSelecionada = {id: 0} as ITarefa;
     },
-    alterarTarefa () {
-      this.store.dispatch(ALTERAR_TAREFA, this.tarefaSelecionada)
-        .then(() => this.fecharModal())
-    }
+    alterarTarefa() {
+      this.store
+        .dispatch(ALTERAR_TAREFA, this.tarefaSelecionada)
+        .then(() => this.fecharModal());
+    },
   },
   setup() {
     const store = useStore();
     store.dispatch(OBTER_TAREFAS);
     store.dispatch(OBTER_PROJETOS);
+
+    const filtro = ref("");
+
+    watchEffect(() => {
+      store.dispatch(OBTER_TAREFAS, filtro.value);
+    });
+
     return {
-      tarefas: computed(() => store.state.tarefas),
+      tarefas: computed(() => store.state.tarefa.tarefas),
       store,
+      filtro,
     };
   },
 });

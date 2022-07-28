@@ -40,7 +40,7 @@
     },
     {
       "duracaoEmSegundos": 3,
-      "descricao": "Reafatorar store 2",
+      "descricao": "Refatorar store 2",
       "projeto": {
         "id": 2,
         "nome": "Alura Tracker 3.0"
